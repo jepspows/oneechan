@@ -1,0 +1,202 @@
+{
+  "trend (MA+ADX)": {
+    "BTC": {
+      "best_params": [
+        0.06,
+        0.1
+      ],
+      "in_sample_ret": -1.77,
+      "out_of_sample_ret": -2.11
+    },
+    "ETH": {
+      "best_params": [
+        0.02,
+        0.1
+      ],
+      "in_sample_ret": 5.86,
+      "out_of_sample_ret": -4.44
+    },
+    "SOL": {
+      "best_params": [
+        0.02,
+        0.1
+      ],
+      "in_sample_ret": 13.37,
+      "out_of_sample_ret": -10.66
+    },
+    "AVAX": {
+      "best_params": [
+        0.02,
+        0.06
+      ],
+      "in_sample_ret": 5.44,
+      "out_of_sample_ret": 0.05
+    },
+    "LINK": {
+      "best_params": [
+        0.02,
+        0.03
+      ],
+      "in_sample_ret": 7.01,
+      "out_of_sample_ret": -1.48
+    },
+    "DOGE": {
+      "best_params": [
+        0.02,
+        0.06
+      ],
+      "in_sample_ret": 4.03,
+      "out_of_sample_ret": -1.86
+    }
+  },
+  "mean-reversion (RSI)": {
+    "BTC": {
+      "best_params": [
+        0.06,
+        0.06
+      ],
+      "in_sample_ret": -4.55,
+      "out_of_sample_ret": -1.54
+    },
+    "ETH": {
+      "best_params": [
+        0.06,
+        0.06
+      ],
+      "in_sample_ret": -5.08,
+      "out_of_sample_ret": -0.43
+    },
+    "SOL": {
+      "best_params": [
+        0.06,
+        0.1
+      ],
+      "in_sample_ret": -3.56,
+      "out_of_sample_ret": -0.57
+    },
+    "AVAX": {
+      "best_params": [
+        0.04,
+        0.1
+      ],
+      "in_sample_ret": 3.48,
+      "out_of_sample_ret": -3.37
+    },
+    "LINK": {
+      "best_params": [
+        0.02,
+        0.1
+      ],
+      "in_sample_ret": 2.32,
+      "out_of_sample_ret": 3.67
+    },
+    "DOGE": {
+      "best_params": [
+        0.06,
+        0.1
+      ],
+      "in_sample_ret": -2.21,
+      "out_of_sample_ret": -1.2
+    }
+  },
+  "breakout (Donchian)": {
+    "BTC": {
+      "best_params": [
+        0.04,
+        0.1
+      ],
+      "in_sample_ret": 0.53,
+      "out_of_sample_ret": 1.13
+    },
+    "ETH": {
+      "best_params": [
+        0.04,
+        0.1
+      ],
+      "in_sample_ret": 2.18,
+      "out_of_sample_ret": 1.46
+    },
+    "SOL": {
+      "best_params": [
+        0.02,
+        0.06
+      ],
+      "in_sample_ret": 12.51,
+      "out_of_sample_ret": -4.91
+    },
+    "AVAX": {
+      "best_params": [
+        0.06,
+        0.06
+      ],
+      "in_sample_ret": -2.59,
+      "out_of_sample_ret": -0.77
+    },
+    "LINK": {
+      "best_params": [
+        0.06,
+        0.1
+      ],
+      "in_sample_ret": -3.57,
+      "out_of_sample_ret": 4.63
+    },
+    "DOGE": {
+      "best_params": [
+        0.06,
+        0.06
+      ],
+      "in_sample_ret": -3.07,
+      "out_of_sample_ret": 0.79
+    }
+  },
+  "momentum (ROC)": {
+    "BTC": {
+      "best_params": [
+        0.02,
+        0.06
+      ],
+      "in_sample_ret": 1.98,
+      "out_of_sample_ret": -2.5
+    },
+    "ETH": {
+      "best_params": [
+        0.02,
+        0.06
+      ],
+      "in_sample_ret": 13.21,
+      "out_of_sample_ret": -3.24
+    },
+    "SOL": {
+      "best_params": [
+        0.02,
+        0.03
+      ],
+      "in_sample_ret": 18.61,
+      "out_of_sample_ret": 0.73
+    },
+    "AVAX": {
+      "best_params": [
+        0.02,
+        0.03
+      ],
+      "in_sample_ret": -1.96,
+      "out_of_sample_ret": 5.76
+    },
+    "LINK": {
+      "best_params": [
+        0.02,
+        0.03
+      ],
+      "in_sample_ret": 4.46,
+      "out_of_sample_ret": -2.69
+    },
+    "DOGE": {
+      "best_params": [
+        0.06,
+        0.06
+      ],
+      "in_sample_ret": -2.25,
+      "out_of_sample_ret": -0.34
+    }
+  }
+}
