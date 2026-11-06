@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-11-06T16:41:09.614245+00:00",
+  "network": "mainnet",
+  "interval": "1h",
+  "bars": 2000,
+  "initial_equity": 10000.0,
+  "risk_pct": 1.0,
+  "stop_pct": 0.03,
+  "tp_pct": 0.06,
+  "max_leverage": 3.0,
+  "fee_rate": 0.00035,
+  "coins": {
+    "BTC": {
+      "coin": "BTC",
+      "interval": "1h",
+      "bars": 2000,
+      "network": "\u2014",
+      "initial_equity": 10000.0,
+      "final_equity": 9775.97,
+      "total_return_pct": -2.24,
+      "trades": 139,
+      "win_rate_pct": 20.9,
+      "profit_factor": 0.96,
+      "avg_win": 53.76,
+      "avg_loss": -14.73,
+      "max_drawdown_pct": 7.23,
+      "sharpe": -1.01
+    },
+    "ETH": {
+      "coin": "ETH",
+      "interval": "1h",
+      "bars": 2000,
+      "network": "\u2014",
+      "initial_equity": 10000.0,
+      "final_equity": 9593.66,
+      "total_return_pct": -4.06,
+      "trades": 148,
+      "win_rate_pct": 19.6,
+      "profit_factor": 0.89,
+      "avg_win": 63.26,
+      "avg_loss": -17.42,
+      "max_drawdown_pct": 10.56,
+      "sharpe": -1.49
+    },
+    "SOL": {
+      "coin": "SOL",
+      "interval": "1h",
+      "bars": 2000,
+      "network": "\u2014",
+      "initial_equity": 10000.0,
+      "final_equity": 9830.17,
+      "total_return_pct": -1.7,
+      "trades": 145,
+      "win_rate_pct": 20.0,
+      "profit_factor": 1.0,
+      "avg_win": 98.44,
+      "avg_loss": -24.59,
+      "max_drawdown_pct": 10.46,
+      "sharpe": -0.45
+    }
+  }
+}

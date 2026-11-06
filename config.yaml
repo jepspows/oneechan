@@ -1,0 +1,42 @@
+# ============================================================
+#  Oneechan — AI trading agent for Hyperliquid L1
+#  Docs / setup guide: see README.md (and oneechan.si)
+# ============================================================
+
+agent:
+  name: oneechan
+  mode: paper                 # paper (safe, simulated) | live (real orders)
+  coins: ["BTC", "ETH", "SOL"]
+  interval: "1h"              # candle interval fed to the brain
+  lookback: 96                # number of candles in context window
+  cadence_seconds: 300        # seconds between decision cycles
+  cooldown_seconds: 3600      # min seconds between trades on the same coin
+  max_position_pct: 25.0      # max notional per position, % of equity
+  max_leverage: 3             # cap on effective leverage
+  risk_per_trade_pct: 1.0     # equity at risk per trade, %
+  fee_rate: 0.00035           # taker fee assumption (paper accounting)
+  paper_initial_usdc: 10000.0 # starting paper balance
+  paper_state_path: state/paper.json
+
+# --- AI brain (multi-provider) -----------------------------------
+# provider: deepseek | openai | anthropic | gemini | openrouter |
+#           groq | xai | together | mistral | perplexity
+# model:   leave blank to use the provider's default, or set an explicit ID.
+#          Examples — deepseek: deepseek-v4-pro / deepseek-flash
+#                     openai:   gpt-4o
+#                     anthropic: claude-sonnet-5-5 / claude-opus-5-5
+#                     gemini:   gemini-3-flash-preview
+# Set the matching key in .env (DEEPSEEK_API_KEY, OPENAI_API_KEY,
+# ANTHROPIC_API_KEY, GEMINI_API_KEY, ...).
+llm:
+  provider: deepseek
+  model: deepseek-v4-pro
+  base_url: ""                # blank = use the provider's default endpoint
+  api_key_env: ""             # blank = use the provider's default key env var
+  temperature: 0.2
+  max_tokens: 1400
+
+hyperliquid:
+  network: testnet            # testnet | mainnet
+  address: ""                 # your main wallet address (public). API wallet supported.
+  # private key is read from HYPERLIQUID_PRIVATE_KEY in .env — never commit it
