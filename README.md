@@ -174,6 +174,19 @@ strategy at 3% stop / 6% take-profit:
 It exists so you have a transparent, reproducible baseline to compare the LLM
 brain and your own ideas against.
 
+**Walk-forward (out-of-sample) validation** — `python research.py` sweeps ~100
+parameter "patterns" on the past 60% of data, picks the best, then runs it on the
+future 40% it never saw. The result is the whole point:
+
+| Coin | Best on the past (curve-fit) | On the future (out-of-sample) |
+| --- | --- | --- |
+| BTC | +0.27% | **−5.82%** |
+| ETH | +16.36% | **−8.01%** |
+| SOL | +16.32% | **−11.50%** |
+
+A strategy that looks +16% on the past collapses to −8% on the future. That gap is
+overfitting — which is exactly why Oneechan does not and cannot promise profit.
+
 > Regenerate the chart + metrics with: `python scripts/gen_charts.py` (requires `matplotlib`).
 > Full methodology in [docs/BACKTESTING.md](docs/BACKTESTING.md).
 

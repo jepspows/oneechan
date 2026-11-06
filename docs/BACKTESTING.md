@@ -43,6 +43,36 @@ The baseline strategy **loses money after fees** in the tested window. This is t
 point: it gives you a transparent, reproducible floor to compare against, and it is
 a reminder that backtests do not guarantee future results.
 
+## Walk-forward (out-of-sample) validation
+
+The single most important question is: *"if I tune this on the past, does it work
+on the future?"* `research.py` answers it honestly using a train/test split:
+
+1. split history into **in-sample** (past 60%) and **out-of-sample** (future 40%),
+2. sweep a grid of ~100 parameter "patterns" on the **in-sample** window only,
+3. take whichever config looks best in-sample,
+4. run that exact config on the **out-of-sample** window it has never seen.
+
+```bash
+python research.py
+```
+
+Results (Hyperliquid mainnet, 1h, 4,000 bars ≈ 167 days):
+
+| Coin | Best in-sample (curve-fit) | Out-of-sample (the "future") | Verdict |
+| --- | --- | --- | --- |
+| BTC | +0.27% | **−5.82%** | overfit → loses |
+| ETH | +16.36% | **−8.01%** | overfit → loses |
+| SOL | +16.32% | **−11.50%** | overfit → loses |
+
+Even with no curve-fitting (fixed 2% stop / 6% take-profit / ADX≥20), the
+out-of-sample returns are negative (−4% to −14%).
+
+**This is the honest answer.** A strategy that looks +16% on the past collapses to
+−8% on the future. The gap *is* overfitting — the market does not repeat patterns
+that precisely. This is why Oneechan refuses to promise profit: no parameter
+search changes it, only hides it until real money is on the line.
+
 To actually improve the odds you would need to, in order of impact:
 
 1. Run the **LLM brain** (DeepSeek/Claude/…) in paper mode for weeks and let the

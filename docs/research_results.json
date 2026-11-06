@@ -1,0 +1,77 @@
+{
+  "BTC": {
+    "best_params": {
+      "stop": 0.03,
+      "tp": 0.12,
+      "adx_min": 25
+    },
+    "in_sample": {
+      "ret": 0.27,
+      "trades": 83,
+      "winrate": 25.3,
+      "equity": 10026.58
+    },
+    "out_of_sample": {
+      "ret": -5.82,
+      "trades": 51,
+      "winrate": 17.6,
+      "equity": 9417.84
+    },
+    "defaults_ood": {
+      "ret": -5.87,
+      "trades": 67,
+      "winrate": 16.4,
+      "equity": 9413.2
+    }
+  },
+  "ETH": {
+    "best_params": {
+      "stop": 0.015,
+      "tp": 0.08,
+      "adx_min": 25
+    },
+    "in_sample": {
+      "ret": 16.36,
+      "trades": 87,
+      "winrate": 28.7,
+      "equity": 11636.25
+    },
+    "out_of_sample": {
+      "ret": -8.01,
+      "trades": 60,
+      "winrate": 16.7,
+      "equity": 9198.95
+    },
+    "defaults_ood": {
+      "ret": -4.08,
+      "trades": 79,
+      "winrate": 22.8,
+      "equity": 9592.37
+    }
+  },
+  "SOL": {
+    "best_params": {
+      "stop": 0.015,
+      "tp": 0.03,
+      "adx_min": 30
+    },
+    "in_sample": {
+      "ret": 16.32,
+      "trades": 89,
+      "winrate": 38.2,
+      "equity": 11632.05
+    },
+    "out_of_sample": {
+      "ret": -11.5,
+      "trades": 46,
+      "winrate": 21.7,
+      "equity": 8850.37
+    },
+    "defaults_ood": {
+      "ret": -13.86,
+      "trades": 82,
+      "winrate": 14.6,
+      "equity": 8614.35
+    }
+  }
+}

@@ -63,6 +63,28 @@ def rsi(values: list[float], period: int = 14) -> float:
     return 100.0 - (100.0 / (1.0 + rs))
 
 
+def rsi_series(values: list[float], period: int = 14) -> list[float]:
+    """Full RSI series in O(n), aligned to the input."""
+    n = len(values)
+    out = [50.0] * n
+    if n < period + 1:
+        return out
+    gains = losses = 0.0
+    for i in range(1, period + 1):
+        d = values[i] - values[i - 1]
+        gains += max(d, 0.0)
+        losses += max(-d, 0.0)
+    avg_gain = gains / period
+    avg_loss = losses / period
+    out[period] = 100.0 if avg_loss == 0 else 100.0 - 100.0 / (1.0 + avg_gain / avg_loss)
+    for i in range(period + 1, n):
+        d = values[i] - values[i - 1]
+        avg_gain = (avg_gain * (period - 1) + max(d, 0.0)) / period
+        avg_loss = (avg_loss * (period - 1) + max(-d, 0.0)) / period
+        out[i] = 100.0 if avg_loss == 0 else 100.0 - 100.0 / (1.0 + avg_gain / avg_loss)
+    return out
+
+
 def atr(highs: list[float], lows: list[float], closes: list[float], period: int = 14) -> float:
     if len(closes) < 2:
         return 0.0
@@ -75,6 +97,51 @@ def atr(highs: list[float], lows: list[float], closes: list[float], period: int 
     if not trs:
         return 0.0
     return sum(trs[-period:]) / min(period, len(trs))
+
+
+def adx(highs: list[float], lows: list[float], closes: list[float], period: int = 14) -> list[float]:
+    """Average Directional Index (Wilder) — trend strength. Values 0-100.
+    >25 = trending, <20 = choppy/ranging. Returns a list aligned to input."""
+    n = len(closes)
+    out = [0.0] * n
+    if n < period * 2:
+        return out
+    plus_dm = [0.0] * n
+    minus_dm = [0.0] * n
+    tr = [0.0] * n
+    for i in range(1, n):
+        up = highs[i] - highs[i - 1]
+        down = lows[i - 1] - lows[i]
+        plus_dm[i] = up if (up > down and up > 0) else 0.0
+        minus_dm[i] = down if (down > up and down > 0) else 0.0
+        tr[i] = max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1]))
+
+    def wilder(vals: list[float]) -> list[float]:
+        s = [0.0] * n
+        s[period] = sum(vals[1:period + 1])
+        for i in range(period + 1, n):
+            s[i] = s[i - 1] - s[i - 1] / period + vals[i]
+        return s
+
+    str_tr = wilder(tr)
+    s_pdm = wilder(plus_dm)
+    s_mdm = wilder(minus_dm)
+    dx = [0.0] * n
+    for i in range(period, n):
+        if str_tr[i] == 0:
+            continue
+        pdi = 100 * s_pdm[i] / str_tr[i]
+        mdi = 100 * s_mdm[i] / str_tr[i]
+        s = pdi + mdi
+        dx[i] = 100 * abs(pdi - mdi) / s if s else 0.0
+
+    start = period * 2
+    if start >= n:
+        return out
+    out[start] = sum(dx[period:start]) / period
+    for i in range(start + 1, n):
+        out[i] = (out[i - 1] * (period - 1) + dx[i]) / period
+    return out
 
 
 class MarketData:
