@@ -40,6 +40,16 @@ class AgentConfig:
     fee_rate: float = 0.00035
     paper_initial_usdc: float = 10000.0
     paper_state_path: str = "state/paper.json"
+    team_enabled: bool = True  # run the multi-agent team (vs single Brain)
+
+
+@dataclass
+class TeamConfig:
+    # Specialist roles to run before the Lead. Lead always runs. Pass an empty
+    # list to run a lead-only desk (closest to the single-brain behaviour).
+    roles: list = field(default_factory=lambda: [
+        "market_analyst", "flow_analyst", "advisor", "risk_manager",
+    ])
 
 
 @dataclass
@@ -47,6 +57,7 @@ class Config:
     agent: AgentConfig = field(default_factory=AgentConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     hyperliquid: HyperliquidConfig = field(default_factory=HyperliquidConfig)
+    team: TeamConfig = field(default_factory=TeamConfig)
 
     @classmethod
     def load(cls, path: str = "config.yaml") -> "Config":
@@ -60,7 +71,7 @@ class Config:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Config":
         cfg = cls()
-        for section in ("agent", "llm", "hyperliquid"):
+        for section in ("agent", "llm", "hyperliquid", "team"):
             target = getattr(cfg, section)
             for key, value in (data.get(section) or {}).items():
                 if hasattr(target, key):

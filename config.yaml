@@ -17,6 +17,19 @@ agent:
   fee_rate: 0.00035           # taker fee assumption (paper accounting)
   paper_initial_usdc: 10000.0 # starting paper balance
   paper_state_path: state/paper.json
+  team_enabled: true          # run the multi-agent team (see `team:` below)
+
+# --- Multi-agent trading desk -------------------------------------
+# With team_enabled=true the agent runs a "team" of specialist roles and a Lead
+# Portfolio Manager instead of one single brain:
+#   market_analyst — trend / momentum / support-resistance
+#   flow_analyst   — funding, order-book imbalance, positioning / crowding
+#   advisor        — macro risk environment, whether to participate
+#   risk_manager   — approve/veto + hard caps on stop, take-profit, leverage
+# The Lead always runs and turns their reports into the final LONG/SHORT/CLOSE/HOLD.
+# Set `roles: []` for a lead-only desk, or drop roles to save LLM calls.
+team:
+  roles: ["market_analyst", "flow_analyst", "advisor", "risk_manager"]
 
 # --- AI brain (multi-provider) -----------------------------------
 # provider: deepseek | openai | anthropic | gemini | openrouter |

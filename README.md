@@ -31,10 +31,13 @@ Oneechan is an **AI-powered perpetual-futures trading agent** that runs on
 [Hyperliquid L1](https://hyperliquid.xyz). Every decision cycle it:
 
 1. pulls live on-chain market data (candles, funding, order book),
-2. asks an LLM — **DeepSeek, Claude, GPT, Gemini, or 9 other providers** — to reason
-   over that data and return a structured `LONG / SHORT / CLOSE / HOLD` signal,
+2. convenes a **trading desk** — a team of specialist LLM roles (a Market Analyst,
+   a Flow & Sentiment Analyst, a Financial Advisor, and a Risk Manager) that each
+   reason over the data and hand their reports to a **Lead Portfolio Manager** that
+   returns a structured `LONG / SHORT / CLOSE / HOLD` signal — with **DeepSeek,
+   Claude, GPT, Gemini, or 9 other providers** driving every seat,
 3. sizes the position with a **risk engine** (equity-at-risk, stop, max-notional,
-   max-leverage caps),
+   max-leverage caps) — with the Risk Manager's caps enforced as a hard backstop,
 4. executes through the official Hyperliquid SDK — **simulated paper fills by
    default**, real orders only when you explicitly opt in.
 
@@ -51,7 +54,7 @@ real Hyperliquid candles before risking a cent.
 ```mermaid
 flowchart TD
     A["Hyperliquid Info API<br/>candles · funding · order book"] --> B["MarketData<br/>SMA · EMA · RSI · ATR"]
-    B --> C["AI Brain<br/>DeepSeek · Claude · GPT · Gemini · …"]
+    B --> C["Trading desk (team)<br/>Market · Flow · Advisor · Risk → Lead"]
     C --> D{"Signal"}
     D -->|"HOLD"| B
     D -->|"LONG / SHORT / CLOSE"| E["Risk Engine<br/>size · stop · take-profit · caps"]
@@ -63,15 +66,55 @@ flowchart TD
 | Stage | What it does |
 | --- | --- |
 | **MarketData** | Wraps the Hyperliquid `Info` API; computes SMA/EMA/RSI/ATR and book imbalance. Read-only, no keys. |
-| **Brain** | Sends a compact context prompt to the configured LLM and parses a strict JSON decision. Anything invalid becomes `HOLD`. |
-| **Risk** | Converts a signal into a concrete size: risks `risk_per_trade_pct` of equity to the stop, capped by max notional + max leverage. |
+| **Trading desk** | A team of specialist LLM roles (Market Analyst, Flow & Sentiment, Financial Advisor, Risk Manager) each return a report; the **Lead Portfolio Manager** turns them into one strict JSON decision. Anything invalid becomes `HOLD`. |
+| **Risk** | Converts a signal into a concrete size: risks `risk_per_trade_pct` of equity to the stop, capped by max notional + max leverage — and the Risk Manager's caps are enforced as a hard backstop. |
 | **Executor** | Paper mode fills at mid with a taker-fee assumption; live mode signs real orders via an **API wallet** (trade-only, no withdraw). |
 | **Ledger** | Persists equity, positions and trade history to disk every cycle. |
 
 ---
 
+## The trading desk (multi-agent team)
+
+Oneechan's default is a **team**, not a single model. Every cycle, up to five
+seats reason over the same market snapshot and then a Lead aggregates:
+
+| Seat | Role | Output |
+| --- | --- | --- |
+| **Market Analyst** | Technicals — trend, momentum, support/resistance | `bias`, `conviction`, regime, levels |
+| **Flow & Sentiment Analyst** | Funding rate, order-book imbalance, positioning/crowding | `bias`, crowding, funding signal |
+| **Financial Advisor** | Macro risk environment — risk-on or stand aside | `risk_on`, advised max leverage |
+| **Risk Manager** | Independent, conservative; capital preservation | `approve`/veto + caps on stop/tp/leverage |
+| **Lead Portfolio Manager** | Weighs all reports → final decision | `LONG / SHORT / CLOSE / HOLD` |
+
+The **Risk Manager's caps are enforced as a hard backstop**: even if the Lead is
+over-eager, the leverage ceiling, stop floor and take-profit cap are clamped, and
+an explicit `approve: false` vetoes the trade entirely.
+
+The team is fully configurable and cost-aware:
+
+```yaml
+agent:
+  team_enabled: true              # false -> single-brain behaviour
+team:
+  roles: ["market_analyst", "flow_analyst", "advisor", "risk_manager"]
+  # drop roles to save LLM calls, or [] for a lead-only desk
+```
+
+All seats use the same `llm.provider` / model and key — one `.env` entry drives
+the whole desk. Run `python main.py --once --brain mock` to see the team structure
+work with zero keys, or `--no-team` to force the single-brain path.
+
+> ⚠️ The team improves the *quality of reasoning* and risk discipline — it does
+> **not** make losses impossible. See [Backtesting](#backtesting) and
+> [Disclaimer](#disclaimer).
+
+---
+
 ## Features
 
+- **Trading desk (team)** — a Market Analyst, Flow & Sentiment Analyst, Financial
+  Advisor and Risk Manager feed a Lead Portfolio Manager; the Risk Manager can veto
+  and caps every trade.
 - **Multi-provider AI** — one interface, 14 providers (DeepSeek, Claude, GPT, Gemini,
   OpenRouter, Groq, xAI, Together, Mistral, Perplexity, Cohere, Fireworks, Cerebras, Qwen).
 - **Paper-first** — fully simulated trading out of the box. Zero keys required.
@@ -104,9 +147,14 @@ cp .env.example .env
 ```bash
 python main.py --once               # one decision cycle, then exit
 python main.py                      # loop every 5 minutes
-python main.py --brain mock         # run the pipeline with no LLM at all
+python main.py --brain mock         # run the full team pipeline with no LLM at all
+python main.py --no-team            # single-brain mode (skip the desk)
 python main.py --coins BTC SOL      # override the coin list
 ```
+
+The default (`team_enabled: true`) runs the multi-agent **trading desk**; the logs
+show each specialist's report plus the Lead's final call. No keys required for the
+mock run.
 
 **Backtest the rule strategy (no keys, real data):**
 
@@ -207,6 +255,8 @@ All settings live in `config.yaml`. Defaults are safe and paper-only.
 | `agent.max_position_pct` | `25.0` | Max notional per position, % of equity |
 | `agent.max_leverage` | `3` | Max effective leverage |
 | `agent.risk_per_trade_pct` | `1.0` | Equity at risk per trade, % |
+| `agent.team_enabled` | `true` | Run the multi-agent trading desk (`false` = single brain) |
+| `team.roles` | `[market_analyst, flow_analyst, advisor, risk_manager]` | Specialist seats that run before the Lead (Lead always runs) |
 | `llm.provider` | `deepseek` | Which provider to use |
 | `llm.model` | `deepseek-v4-pro` | Provider model ID |
 | `llm.base_url` | `""` | Override endpoint (blank = provider default) |
@@ -234,6 +284,7 @@ oneechan/
     ├── market.py           # Hyperliquid Info wrapper + indicators
     ├── llm.py              # multi-provider LLM abstraction
     ├── brain.py            # signal engine (+ mock fallback)
+    ├── team.py             # multi-agent trading desk (specialists + Lead)
     ├── risk.py             # position sizing
     ├── state.py            # paper account ledger
     ├── executor.py         # paper / live order placement

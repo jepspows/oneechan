@@ -11,14 +11,32 @@ from .executor import Executor
 from .llm import default_key_env, get_llm
 from .market import MarketData
 from .risk import position_size
+from .team import SPECIALISTS, MockTeam, Team
 
 
 def log(msg: str) -> None:
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def build_brain(cfg: Config, override: str | None):
+def resolve_roles(cfg: Config) -> list:
+    """Map the configured role ids to their registry entries, in order."""
+    ids = cfg.team.roles or []
+    by_id = {r["id"]: r for r in SPECIALISTS}
+    return [by_id[i] for i in ids if i in by_id]
+
+
+def build_brain(cfg: Config, override: str | None, team_override: bool | None = None):
+    """Build the decision engine: multi-agent Team, single Brain, or a mock fallback.
+
+    Returns any object exposing `.decide(coin, context, existing) -> Signal`.
+    """
+    team_enabled = cfg.agent.team_enabled if team_override is None else team_override
+    roles = resolve_roles(cfg)
+
     if override == "mock":
+        if team_enabled:
+            log(f"team (mock): {len(roles)} specialists + lead — deterministic, no LLM")
+            return MockTeam(roles)
         log("brain: mock (deterministic, no LLM)")
         return MockBrain()
     if override:
@@ -26,24 +44,29 @@ def build_brain(cfg: Config, override: str | None):
         cfg.llm.provider = override
     key_env = cfg.llm.api_key_env or default_key_env(cfg.llm.provider)
     if not os.environ.get(key_env):
-        log(f"brain: no {key_env} found — falling back to MOCK brain. "
+        log(f"brain: no {key_env} found — falling back to MOCK. "
             f"Add a key to .env to use {cfg.llm.provider}.")
-        return MockBrain()
+        return MockTeam(roles) if team_enabled else MockBrain()
     try:
         llm = get_llm(cfg.llm.provider, cfg.llm.model, cfg.llm.base_url,
                       cfg.llm.api_key_env, cfg.llm.temperature, cfg.llm.max_tokens)
     except Exception as exc:
         log(f"brain: failed to init {cfg.llm.provider} ({exc}) — falling back to MOCK.")
-        return MockBrain()
+        return MockTeam(roles) if team_enabled else MockBrain()
+    if team_enabled:
+        log(f"team: {len(roles)} specialists + lead via "
+            f"{cfg.llm.provider}/{cfg.llm.model or 'default'}")
+        return Team(llm, roles)
     log(f"brain: {cfg.llm.provider}/{cfg.llm.model or 'default'}")
     return Brain(llm)
 
 
 class Agent:
-    def __init__(self, cfg: Config, brain_override: str | None = None):
+    def __init__(self, cfg: Config, brain_override: str | None = None,
+                 team_override: bool | None = None):
         self.cfg = cfg
         self.market = MarketData(cfg.hyperliquid.network)
-        self.brain = build_brain(cfg, brain_override)
+        self.brain = build_brain(cfg, brain_override, team_override)
         private_key = os.environ.get("HYPERLIQUID_PRIVATE_KEY") or None
         self.executor = Executor(
             mode=cfg.agent.mode,
@@ -122,6 +145,9 @@ class Agent:
         }
 
         signal: Signal = self.brain.decide(coin, context, existing)
+        if hasattr(self.brain, "summaries"):
+            for line in self.brain.summaries():
+                log(f"  [{coin}] {line}")
         log(f"[{coin}] {signal.action} (conf={signal.confidence:.2f}) — {signal.reasoning}")
 
         if signal.action == "HOLD":

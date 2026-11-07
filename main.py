@@ -21,6 +21,10 @@ def main() -> None:
                         help="force the brain: 'mock' (no LLM) or a provider name "
                              "(deepseek, openai, anthropic, gemini, openrouter, groq, "
                              "xai, together, mistral, perplexity)")
+    parser.add_argument("--team", dest="team", action="store_true", default=None,
+                        help="force the multi-agent team on")
+    parser.add_argument("--no-team", dest="team", action="store_false",
+                        help="force the multi-agent team off (single brain)")
     parser.add_argument("--once", action="store_true",
                         help="run a single decision cycle then exit")
     args = parser.parse_args()
@@ -35,7 +39,7 @@ def main() -> None:
     if args.interval:
         cfg.agent.interval = args.interval
 
-    agent = Agent(cfg, brain_override=args.brain)
+    agent = Agent(cfg, brain_override=args.brain, team_override=args.team)
     if args.once:
         agent.cycle()
     else:
